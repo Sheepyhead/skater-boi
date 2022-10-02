@@ -17,8 +17,11 @@
 
 use bevy::{prelude::*, window::PresentMode};
 use bevy_rapier3d::prelude::*;
+use controls::{Action, Controls};
 use debug::Debug;
+use leafwing_input_manager::{prelude::InputMap, InputManagerBundle};
 
+mod controls;
 mod debug;
 
 pub const CLEAR: Color = Color::BLACK;
@@ -41,6 +44,7 @@ fn main() {
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugin(RapierDebugRenderPlugin::default())
         // Internal plugins
+        .add_plugin(Controls)
         .add_plugin(Debug)
         .add_startup_system(spawn_camera)
         .add_startup_system(spawn_player)
@@ -51,8 +55,8 @@ fn main() {
 fn spawn_camera(mut commands: Commands) {
     let mut camera = Camera3dBundle::default();
 
-    camera.transform.translation = [-3.0, 2.0, 0.0].into();
-    camera.transform.look_at(Vec3::X, Vec3::Y);
+    camera.transform.translation = [0.0, 2.0, 3.0].into();
+    camera.transform.look_at(Vec3::NEG_Z, Vec3::Y);
 
     commands.spawn_bundle(camera);
 }
@@ -66,5 +70,17 @@ fn spawn_ground(mut commands: Commands) {
 fn spawn_player(mut commands: Commands) {
     commands
         .spawn_bundle(SpatialBundle { ..default() })
-        .insert_bundle((Collider::cylinder(0.5, 0.25), RigidBody::Dynamic));
+        .insert_bundle(InputManagerBundle::<Action> {
+            input_map: InputMap::new([
+                (KeyCode::Comma, Action::Accelerate),
+                (KeyCode::E, Action::TurnRight),
+            ]),
+            ..default()
+        })
+        .insert_bundle((
+            Collider::cylinder(0.5, 0.25),
+            RigidBody::Dynamic,
+            ExternalForce::default(),
+            LockedAxes::ROTATION_LOCKED,
+        ));
 }
