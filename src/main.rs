@@ -17,10 +17,12 @@
 
 use bevy::{prelude::*, window::PresentMode};
 use bevy_rapier3d::prelude::*;
+use camera::CameraPlugin;
 use controls::{Action, Controls};
 use debug::Debug;
 use leafwing_input_manager::{prelude::InputMap, InputManagerBundle};
 
+mod camera;
 mod controls;
 mod debug;
 
@@ -44,22 +46,14 @@ fn main() {
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugin(RapierDebugRenderPlugin::default())
         // Internal plugins
+        .add_plugin(CameraPlugin)
         .add_plugin(Controls)
         .add_plugin(Debug)
-        .add_startup_system(spawn_camera)
         .add_startup_system(spawn_player)
         .add_startup_system(spawn_ground)
         .run();
 }
 
-fn spawn_camera(mut commands: Commands) {
-    let mut camera = Camera3dBundle::default();
-
-    camera.transform.translation = [0.0, 2.0, 3.0].into();
-    camera.transform.look_at(Vec3::NEG_Z, Vec3::Y);
-
-    commands.spawn_bundle(camera);
-}
 
 fn spawn_ground(mut commands: Commands) {
     commands
@@ -82,5 +76,9 @@ fn spawn_player(mut commands: Commands) {
             RigidBody::Dynamic,
             ExternalForce::default(),
             LockedAxes::ROTATION_LOCKED,
+            Player,
         ));
 }
+
+#[derive(Component)]
+pub struct Player;

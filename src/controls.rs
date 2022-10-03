@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_rapier3d::prelude::{ExternalForce, Velocity};
+use bevy_rapier3d::prelude::ExternalForce;
 use leafwing_input_manager::prelude::*;
 
 pub struct Controls;
